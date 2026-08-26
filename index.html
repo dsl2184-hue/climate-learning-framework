@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Climate Interview Dossier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EEF0EA;
+    --paper-raised: #F7F8F4;
+    --ink: #1B241F;
+    --ink-muted: #5B6B60;
+    --rule: #CBD2C4;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Public Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+  }
+  #app {
+    display: flex;
+    min-height: 100vh;
+  }
+  /* Tab rail */
+  #tab-rail {
+    width: 84px;
+    background: var(--paper-raised);
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    padding-top: 24px;
+    flex-shrink: 0;
+  }
+  .tab-btn {
+    position: relative;
+    background: transparent;
+    color: var(--ink-muted);
+    border: none;
+    padding: 18px 6px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 160ms ease;
+    font-family: inherit;
+  }
+  .tab-btn.active {
+    color: #F7F8F4;
+    margin-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .tab-code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+  .tab-label {
+    font-family: var(--font-display);
+    font-size: 13.5px;
+    font-weight: 600;
+    transform: rotate(180deg);
+    letter-spacing: 0.2px;
+  }
+  /* Main panel */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  #header {
+    padding: 22px 28px 18px;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-raised);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0;
+  }
+  .points-count {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-muted);
+    font-size: 12.5px;
+    font-family: var(--font-mono);
+  }
+  #search-wrap {
+    margin-top: 16px;
+    position: relative;
+    max-width: 420px;
+  }
+  #search-input {
+    width: 100%;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 9px 34px;
+    font-size: 13.5px;
+    color: var(--ink);
+    outline: none;
+    font-family: var(--font-body);
+  }
+  #search-input:focus { border-color: var(--accent); }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-muted);
+    pointer-events: none;
+  }
+  #clear-search {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none;
+  }
+  #match-count {
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+  }
+  #chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    border: 1px solid var(--rule);
+    border-radius: 20px;
+    padding: 5px 12px;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    background: none;
+  }
+  .chip:hover { color: var(--ink); }
+  #tree-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 28px 40px;
+  }
+  ul.tree-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  li.branch {
+    padding: 4px 0;
+  }
+  li.branch.depth-gt0 {
+    border-left: 2px solid var(--rule);
+    padding-left: 16px;
+    margin-left: 8px;
+  }
+  .branch-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .branch-btn.depth0 { padding: 10px 12px; }
+  .branch-btn.depthN { padding: 6px 4px; }
+  .chevron {
+    flex-shrink: 0;
+    transition: transform 160ms ease;
+    color: var(--ink-muted);
+  }
+  .chevron.open { transform: rotate(90deg); }
+  .branch-title.depth0 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 16.5px;
+    color: var(--ink);
+  }
+  .branch-title.depthN {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+  .pts-count {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-muted);
+    letter-spacing: 0.3px;
+  }
+  ul.children-list { list-style: none; margin: 2px 0 0; padding: 0; display: none; }
+  ul.children-list.open { display: block; }
+  li.leaf {
+    border-left: 2px solid var(--rule);
+    padding-left: 16px;
+    margin-left: 8px;
+    position: relative;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  li.leaf::before {
+    content: "";
+    position: absolute;
+    left: -5px;
+    top: 14px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rule);
+  }
+  li.leaf.hit::before { background: var(--accent); }
+  li.leaf p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  mark {
+    border-radius: 2px;
+    padding: 0 2px;
+    color: var(--ink);
+  }
+  .empty-msg { color: var(--ink-muted); font-size: 14px; font-style: italic; }
+  @media (max-width: 640px) {
+    #tab-rail { width: 64px; }
+    h1 { font-size: 22px; }
+    #header, #chips, #tree-container { padding-left: 16px; padding-right: 16px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="tab-rail"></div>
+  <div id="main">
+    <div id="header">
+      <div class="header-top">
+        <div>
+          <div class="eyebrow" id="eyebrow"></div>
+          <h1 id="bab-title"></h1>
+        </div>
+        <div class="points-count">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span id="total-points"></span>
+        </div>
+      </div>
+      <div id="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search-input" type="text" placeholder="Search within this chapter..." />
+        <button id="clear-search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="match-count"></div>
+    </div>
+    <div id="chips"></div>
+    <div id="tree-container"></div>
+  </div>
+</div>
+
+<script>
+const RAW_BABS = [{"id": "just-transition", "code": "01", "label": "Just Transition", "accent": "#C97A2E", "tree": [{"title": "Core Definitions", "children": [{"title": "Just Transition (JT) = shifting to a low-carbon, sustainable economy in a way that is fair & inclusive to workers, communities, and vulnerable groups"}, {"title": "ILO definition: greening the economy in a way that is as fair and inclusive as possible, creating decent work opportunities and leaving no one behind"}, {"title": "Core idea: decarbonization + socioeconomic protection must move together, NOT sequentially"}, {"title": "Climate Justice Alliance framing: shift from extractive economy → regenerative economy"}, {"title": "Not only energy: applies to any sector facing structural/decarbonization disruption (coal, agriculture, transport, heavy industry)"}]}, {"title": "Four Pillars of Justice (EDF Framework)", "children": [{"title": "Procedural justice → inclusive, participatory decision-making; affected stakeholders have a voice"}, {"title": "Distributive justice → fair sharing of costs & benefits of transition across groups"}, {"title": "Recognitional justice → respecting rights, identities & knowledge of Indigenous Peoples & Local Communities (IPLC)"}, {"title": "Restorative justice → redressing past harms (e.g., extractive industries, pollution, displacement)"}, {"title": "Mnemonic: PDRR — Procedural, Distributive, Recognitional, Restorative"}]}, {"title": "Guiding / Operating Principles", "children": [{"title": "UNECE Guiding Principles: Principle 1 - Planning for & Financing the Transition"}, {"title": "Principle 2 - Economic diversification of affected regions"}, {"title": "Principle 3 - Reskilling & upskilling of workers"}, {"title": "Principle 4 - Social protection (safety nets, unemployment support, pensions)"}, {"title": "Principle 5 - Social dialogue & collective bargaining with workers/unions"}, {"title": "SEI Seven Principles: decarbonize AND protect in parallel — delay is not justified by inadequate worker support"}, {"title": "Due-participation principle: multi-stakeholder participation from planning → implementation → evaluation"}]}, {"title": "International Policy Timeline", "children": [{"title": "2015 Paris Agreement preamble → first formal mention of 'just transition of the workforce'"}, {"title": "2018 COP24 (Katowice) → Silesia Declaration on Solidarity and Just Transition"}, {"title": "2021 COP26 (Glasgow) → countries sign up to set of Just Transition principles"}, {"title": "2023 COP28 (Dubai/UAE) → establishes UNFCCC Just Transition Work Programme (JTWP)"}, {"title": "Predecessor concept: Common But Differentiated Responsibilities (CBDR) → macro-level justice between countries"}, {"title": "Just Energy Transition Partnerships (JETPs) → bilateral deals between rich nations & coal-dependent middle-income countries (e.g., Indonesia, South Africa, Vietnam, Senegal)"}]}, {"title": "5 Key Elements (WRI Framework for JTWP)", "children": [{"title": "1. International climate finance, technology transfer & capacity building (Paris Art. 9.1 & 9.4)"}, {"title": "2. Reskilling, economic diversification & employment access"}, {"title": "3. Human rights protection for marginalized/vulnerable groups"}, {"title": "4. Social safety nets: unemployment support, parental leave"}, {"title": "5. National just transition approaches / country-owned frameworks"}, {"title": "Example: South Africa's Presidential Climate Commission (2020) → cross-sector JT coordination (energy, agriculture, tourism)"}]}, {"title": "Who Bears the Impact", "children": [{"title": "Fossil-fuel dependent workers: coal miners, oil/gas workers, power plant staff"}, {"title": "Legacy industries: steel, cement, heavy manufacturing facing stricter emissions rules"}, {"title": "Communities/regions economically dependent on a single industry (e.g., coal towns)"}, {"title": "Informal workers & women — often excluded from formal safety nets"}, {"title": "Indigenous Peoples & Local Communities — land/resource rights affected by both extraction AND green infrastructure (mining for transition minerals, renewable siting)"}]}, {"title": "Policy Tools & Mechanisms", "children": [{"title": "Carbon pricing revenue recycling → e.g., EU ETS Social Climate Fund supports vulnerable households"}, {"title": "Fossil fuel subsidy reform with targeted protection → e.g., Morocco kept butane subsidies for low-income households"}, {"title": "Reskilling/retraining programs for displaced workers"}, {"title": "Regional economic diversification funds for coal-dependent areas"}, {"title": "Social dialogue institutions: tripartite bodies (government–business–labor)"}, {"title": "National Just Transition Frameworks embedded in NDCs (Nationally Determined Contributions) & LTS (Long-Term Strategies)"}]}, {"title": "Company / Corporate Level Application", "children": [{"title": "Include business as key stakeholder & delivery agent, not just regulated party"}, {"title": "Workforce transition plans: mapping at-risk jobs, retraining pathways"}, {"title": "Collective bargaining on workplace change & resource productivity"}, {"title": "Supply chain due diligence: JT considerations extend to suppliers/contractors"}, {"title": "Transparent, publicly monitored agreements with workers & unions"}]}, {"title": "Common Pitfalls / Critiques", "children": [{"title": "'Just' transition can become a slogan without measurable commitments (greenwashing of JT)"}, {"title": "Risk of new injustice: mineral extraction for EV batteries/renewables can replicate extractive harms (esp. IPLC land rights)"}, {"title": "Developing countries lack finance/capacity vs developed countries' historical responsibility"}, {"title": "JT principles pursued selectively rather than 'in parallel' as intended — worker support delayed or dropped"}, {"title": "Informal economy workers often invisible in official JT plans"}]}, {"title": "Top 20 Exam Facts", "children": [{"title": "JT first appears formally in 2015 Paris Agreement preamble"}, {"title": "4 pillars: Procedural, Distributive, Recognitional, Restorative justice (PDRR)"}, {"title": "COP24 (2018) = Silesia Declaration"}, {"title": "COP26 (2021) = JT principles agreed"}, {"title": "COP28 (2023) = Just Transition Work Programme (JTWP) launched"}, {"title": "JETP = Just Energy Transition Partnership (bilateral rich-to-coal-dependent country finance deal)"}, {"title": "CBDR = Common But Differentiated Responsibilities — precursor concept, country-level justice"}, {"title": "Paris Agreement Art. 9.1 & 9.4 → developed countries must provide climate finance to developing countries"}, {"title": "EU ETS → Social Climate Fund recycles carbon revenue to vulnerable households"}, {"title": "Morocco butane subsidy reform = example of targeted protection during subsidy reform"}, {"title": "South Africa Presidential Climate Commission (2020) = national JT coordinating body"}, {"title": "Core JT principle: decarbonize AND protect workers in parallel, not sequentially"}, {"title": "Just Transition applies beyond energy: agriculture, transport, heavy industry too"}, {"title": "IPLC = Indigenous Peoples & Local Communities — central to recognitional & restorative justice"}, {"title": "Key risk: transition mineral mining can create new extractive injustice"}, {"title": "JT should be embedded in NDCs & LTS (national climate plans)"}, {"title": "Social dialogue = tripartite: government, business, labor/unions"}, {"title": "ILO Guidelines for a Just Transition = foundational labor-standard reference document"}, {"title": "Climate Justice Alliance: JT = shift from extractive to regenerative economy"}, {"title": "Biggest critique: JT commitments often symbolic without financing or enforcement"}]}, {"title": "Interview Prep", "children": [{"title": "Q: What is a 'just transition' in your own words?", "children": [{"title": "A: Moving to a low-carbon economy in a way that shares costs & benefits fairly — protecting workers, communities, and vulnerable groups instead of leaving them behind"}, {"title": "Add value: mention it's not only about energy — applies to agriculture, transport, heavy industry too"}, {"title": "Strong closer: decarbonization and social protection must happen in parallel, not sequentially"}]}, {"title": "Q: Walk me through the international policy evolution of Just Transition", "children": [{"title": "A: 2015 Paris Agreement preamble (first mention) → 2018 COP24 Silesia Declaration → 2021 COP26 JT principles → 2023 COP28 Just Transition Work Programme"}, {"title": "Bonus: mention JETPs (Indonesia, South Africa, Vietnam) as concrete bilateral financing mechanisms"}]}, {"title": "Q: How would you structure a Just Transition plan for a company/region?", "children": [{"title": "A: Start with stakeholder mapping (who is affected) → apply the 4 pillars (procedural, distributive, recognitional, restorative) → build social dialogue mechanism with unions/workers"}, {"title": "Then: reskilling programs, economic diversification funding, transparent public monitoring of commitments"}]}, {"title": "Q: What's a real risk or criticism of Just Transition efforts today?", "children": [{"title": "A: Transition mineral extraction (cobalt, lithium, nickel for EVs/renewables) can replicate the same extractive harms JT is meant to fix, especially on Indigenous land"}, {"title": "Second angle: JT commitments often symbolic — 'just' language used without financing or enforcement (JT-washing)"}]}, {"title": "Q: How is Just Transition different from general climate mitigation policy?", "children": [{"title": "A: Mitigation focuses on emissions reduction; JT layers in the social/equity dimension — who bears the cost, who is consulted, who is compensated"}, {"title": "Key phrase to use: 'no one left behind'"}]}, {"title": "Curveball: Give an example where JT principles conflicted with speed of decarbonization", "children": [{"title": "A: Coal phase-out timelines vs worker retraining timelines — political pressure to close plants fast can outpace realistic reskilling programs"}, {"title": "Good answer shows you understand JT is a balancing act, not a checkbox"}]}, {"title": "Behavioral: Tell me about a time you had to balance competing stakeholder interests", "children": [{"title": "Use STAR format (Situation-Task-Action-Result); tie back to JT's procedural justice principle if relevant to role"}, {"title": "Emphasize: transparent communication + structured consultation process, not just consensus-seeking"}]}]}]}, {"id": "climate-investment", "code": "02", "label": "Climate Investment", "accent": "#1F5C6B", "tree": [{"title": "Core Definitions", "children": [{"title": "Climate finance = capital flows (public/private/domestic/international) directed to mitigation & adaptation activities"}, {"title": "Climate investment = subset focused on capital deployment expecting financial + environmental return (vs pure grants/aid)"}, {"title": "Two core purposes: Mitigation (reduce/avoid emissions) vs Adaptation (build resilience to climate impacts)"}, {"title": "Green finance = broader umbrella: loans, investments, products prioritizing sustainability/environmental outcomes"}, {"title": "Transition finance = capital for hard-to-abate sectors moving toward lower-carbon pathways (not yet 'green')"}]}, {"title": "The Financing Gap", "children": [{"title": "Global investment needed to meet Paris goals: USD 3-7 trillion/year by 2030"}, {"title": "Developing economies alone need ~USD 2 trillion/year (IEA estimate)"}, {"title": "Current global climate finance flows: ~USD 802 billion/year — far short of need"}, {"title": "Over 80% of flows concentrated in developed/middle-income countries (East Asia & Pacific incl. China, North America, Western Europe)"}, {"title": "Developing countries face higher cost of capital → 'sovereign ceiling' problem limits access to markets"}]}, {"title": "Key Financial Instruments", "children": [{"title": "Green bonds → proceeds earmarked exclusively for environmental/climate projects (renewable energy, efficiency, clean transport, water, green buildings)"}, {"title": "Sovereign green bonds (SGBs) → government-issued; first issued 2016; enable national climate objective funding"}, {"title": "Blue bonds → subset of green bonds for marine/ocean projects"}, {"title": "Sustainability-linked bonds/loans → interest rate tied to ESG performance milestones"}, {"title": "Blended finance → combines public/concessional + private capital to de-risk investment (grants, guarantees, first-loss capital)"}, {"title": "Catalytic capital → blended capital using guarantees/credit enhancement to attract private investors"}, {"title": "Debt-for-nature/debt-for-climate swaps → e.g., Bahamas 2024 swap backed by USD 200M IDB guarantee"}, {"title": "Carbon markets/credits → cap-and-trade compliance markets + voluntary carbon markets (VCM)"}, {"title": "Guarantees → e.g., World Bank (AAA), GuarantCo, Green Guarantee Company improve issuer creditworthiness"}, {"title": "Payment for Ecosystem Services (PES) → market-based compensation for conserving natural capital"}]}, {"title": "Market Scale & Trends", "children": [{"title": "Global green bond market ≈ EUR 702 billion (2022)"}, {"title": "Only 13% of green bonds issued by developing country entities (only 5% excluding China)"}, {"title": "Global ESG assets projected to exceed USD 50 trillion by 2025"}, {"title": "GSS+ bonds = Green, Social, Sustainability, Sustainability-linked (and related) bond family"}, {"title": "Greenium = lower yield/borrowing cost investors accept for green-labeled bonds vs conventional"}]}, {"title": "Public Sector & Institutional Role", "children": [{"title": "Multilateral Development Banks (MDBs): World Bank, ADB, IDB, AfDB — provide concessional loans, guarantees, technical assistance"}, {"title": "Role of public finance: de-risking, catalyzing private capital, funding early-stage project design/technical assistance"}, {"title": "IHLEG (Independent High-Level Expert Group on Climate Finance) → recommends mix of carbon taxes, carbon pricing, guarantees to mobilize private finance"}, {"title": "Regulatory push: EU Sustainable Finance Disclosure Regulation (SFDR) → transparency, anti-greenwashing"}, {"title": "National green banks / climate funds channel blended capital domestically"}]}, {"title": "Risk & Barriers to Investment", "children": [{"title": "High perceived/actual risk in developing markets → higher cost of capital"}, {"title": "Currency risk for foreign-currency denominated climate debt"}, {"title": "Small project size vs high transaction costs for structuring deals"}, {"title": "Weak enabling environment: policy uncertainty, regulatory gaps, limited pipeline of bankable projects"}, {"title": "Greenwashing risk — mislabeling of financial products as 'green' without real impact"}, {"title": "Liquidity — bonds more liquid/tradable than loans/notes, expanding investor base"}]}, {"title": "Sectoral Applications", "children": [{"title": "Renewable energy generation & storage"}, {"title": "Energy efficiency retrofits (buildings, industry)"}, {"title": "Clean/electrified transport infrastructure"}, {"title": "Climate-resilient infrastructure & disaster risk financing"}, {"title": "Sustainable agriculture & water management (links to Bab 3: Food & Nature)"}, {"title": "Circular economy / resource efficiency investment (links to Bab 4)"}]}, {"title": "Top 20 Exam Facts", "children": [{"title": "Global need: USD 3-7 trillion/year by 2030 to meet Paris goals"}, {"title": "Developing economies need ~USD 2 trillion/year (IEA)"}, {"title": "Current global flows only ~USD 802 billion/year"}, {"title": ">80% of climate finance stays within developed/middle-income domestic economies"}, {"title": "Green bonds: proceeds must be exclusively used for green/climate projects"}, {"title": "First sovereign green bond issued in 2016"}, {"title": "Blue bonds = subset of green bonds for marine projects"}, {"title": "Blended finance = public/concessional capital de-risking private investment"}, {"title": "Catalytic capital uses guarantees/credit enhancement to attract private investors"}, {"title": "Greenium = lower cost of capital for green-labeled debt"}, {"title": "Only 13% of 2022 green bond market (EUR 702bn) issued by developing countries (5% excl. China)"}, {"title": "ESG assets projected to exceed USD 50 trillion by 2025"}, {"title": "SFDR = EU regulation combating greenwashing, improving disclosure"}, {"title": "Bahamas 2024 debt-for-nature swap backed by USD 200M IDB guarantee"}, {"title": "MDBs (World Bank, ADB, IDB, AfDB) = key public climate finance providers"}, {"title": "Sustainability-linked bonds/loans → rates adjust to ESG performance milestones"}, {"title": "Bonds more liquid than loans/notes → broader investor pool, lower rates"}, {"title": "IHLEG recommends carbon taxes + pricing + guarantees to mobilize private capital"}, {"title": "PES = market mechanism paying for ecosystem conservation outcomes"}, {"title": "Transition finance targets hard-to-abate sectors not yet 'green'"}]}, {"title": "Interview Prep", "children": [{"title": "Q: Explain the global climate finance gap in one sentence", "children": [{"title": "A: The world needs USD 3-7 trillion/year by 2030, but current flows are only ~USD 802 billion — and most of that stays in developed/middle-income countries"}, {"title": "Pair with the 'why': developing countries face higher capital costs & weaker enabling environments"}]}, {"title": "Q: What's the difference between a green bond and blended finance?", "children": [{"title": "A: Green bond = a specific debt instrument whose proceeds fund green projects; blended finance = a structuring approach combining concessional/public capital with private capital to de-risk investment"}, {"title": "Clarify: blended finance can be USED to structure a green bond (they're not mutually exclusive)"}]}, {"title": "Q: How would you evaluate whether a climate investment is 'real' vs greenwashing?", "children": [{"title": "A: Check for third-party certification/verification, use-of-proceeds transparency, measurable KPIs, and alignment with recognized frameworks (e.g., ICMA Green Bond Principles, SFDR disclosure)"}, {"title": "Mention: look for a credible MRV (measurement, reporting, verification) system"}]}, {"title": "Q: Why do developing countries struggle to attract green bond investment?", "children": [{"title": "A: Higher perceived risk → higher cost of capital ('sovereign ceiling'), currency risk, small deal sizes vs high transaction costs, weak project pipelines"}, {"title": "Solution to mention: guarantees (e.g., World Bank AAA-backed) and blended finance to improve creditworthiness"}]}, {"title": "Q: If you had to pitch a blended finance structure to a skeptical private investor, how would you frame it?", "children": [{"title": "A: Emphasize risk-adjusted returns — public/concessional capital absorbs first-loss risk, letting private capital enter at market-rate risk with real upside"}, {"title": "Use a concrete example: guarantee-backed bond or tiered fund structure (senior/junior tranches)"}]}, {"title": "Curveball: What's the 'greenium' and does it actually work?", "children": [{"title": "A: Greenium = the lower yield/borrowing cost investors accept for green-labeled debt vs conventional — evidence is mixed and modest, varies by market/issuer credibility"}, {"title": "Shows nuance: don't overclaim it's a guaranteed cost advantage"}]}, {"title": "Behavioral: Describe how you'd analyze a climate investment opportunity", "children": [{"title": "Structure: impact thesis → financial return profile → risk assessment (currency, policy, project) → alignment with frameworks/disclosure standards"}, {"title": "End with: how you'd monitor post-investment (KPIs, reporting cadence)"}]}]}]}, {"id": "food-nature", "code": "03", "label": "Food & Nature", "accent": "#4B7B3F", "tree": [{"title": "Core Definitions", "children": [{"title": "Nature-based Solutions (NbS) → actions to protect, sustainably manage & restore ecosystems that address societal challenges (Cohen-Shacham et al. 2016)"}, {"title": "3 pillars of NbS: Protect, Sustainably Manage, Restore (agro)ecosystems"}, {"title": "Regenerative agriculture → farming/ranching practices rehabilitating soil organic matter, increasing carbon storage & biodiversity"}, {"title": "Agroecology → applies ecological concepts to farming AND explicitly includes human/social dimensions (unlike NbS/regen ag)"}, {"title": "Nature-positive food systems → produce enough food while enhancing (not degrading) biodiversity & ecosystems"}, {"title": "Key distinction: Agroecology = strong social/human focus; NbS & Regenerative Ag = less explicit on social dimension"}]}, {"title": "Scale of the Problem", "children": [{"title": "Agriculture uses >50% of Earth's habitable land"}, {"title": "Agriculture = single largest driver of biodiversity loss, habitat destruction, soil degradation globally"}, {"title": "Only 3 crops (rice, maize, wheat) provide >50% of world's food energy intake — out of 50,000+ edible plants"}, {"title": "Food system demand rising with population growth & economic affluence"}, {"title": "Food systems are both a major emissions source AND highly vulnerable to climate impacts (dual exposure)"}]}, {"title": "Triple Benefit of Ag-NbS", "children": [{"title": "1. Improve farmer livelihoods & agricultural resilience"}, {"title": "2. Mitigate & adapt to climate change (soil, wetland, forest carbon sequestration)"}, {"title": "3. Enhance nature & biodiversity"}, {"title": "Mnemonic: Livelihoods – Climate – Biodiversity (LCB triple win)"}]}, {"title": "IUCN Global Standard for NbS", "children": [{"title": "Launched 2020 by IUCN via global consultation"}, {"title": "8 criteria + 28 indicators to design/assess/scale NbS projects"}, {"title": "Ensures NbS are: environmentally sustainable, socially equitable, economically viable, adaptive"}, {"title": "Purpose: build investor/donor credibility & connect projects to international goals (SDGs, CBD targets)"}]}, {"title": "Key Practices / Interventions", "children": [{"title": "Minimal/no-till farming → preserves soil structure & carbon"}, {"title": "Crop diversification → reduces monoculture risk, improves resilience"}, {"title": "Agroforestry → integrating trees into farmland (e.g., Mali agroforestry restoration > native forest biomass)"}, {"title": "FMNR (Farmer-Managed Natural Regeneration) → low-cost regrowth of trees via selective pruning; used in West/East Africa"}, {"title": "Cover cropping & crop rotation → soil health, pest management"}, {"title": "Eliminating pollinator-harming pesticides → protects essential pollination services"}, {"title": "Watershed & integrated water-land management → improves vegetation + water quality/availability"}, {"title": "Wetland/mangrove restoration → carbon sequestration + coastal protection + fisheries habitat"}]}, {"title": "Case Studies", "children": [{"title": "Niger (Sahel) → restored ~5 million hectares of degraded soil via regenerative practices"}, {"title": "Mali → agroforestry restoration created forest plots with higher biomass than native forest"}, {"title": "Brazil (São Félix do Xingu) → regenerative ranching model integrating cattle + native flora"}, {"title": "Africa voluntary carbon markets → used as catalyst finance for regenerative ag & resilient food systems"}]}, {"title": "Competing Frameworks / Terminology Debate", "children": [{"title": "'Smoke & Mirrors' critique (IPES-Food): NbS gaining traction but lacks clear definition/transformative vision"}, {"title": "Agroecology seen as more comprehensive pathway (explicit social equity + system transformation)"}, {"title": "Other overlapping terms: climate-smart agriculture, sustainable intensification, conservation agriculture, permaculture, biodynamic & organic farming"}, {"title": "Risk: terminology proliferation → dilutes accountability, enables 'greenwashing' of business-as-usual practices"}, {"title": "All three (Agroecology / Regen Ag / NbS) share: ecosystem restoration goal, biodiversity focus, holistic integration"}]}, {"title": "Finance & Investment Angle", "children": [{"title": "FAO finance guide: identifying & structuring investable Ag-NbS projects"}, {"title": "Blended finance mechanisms used for smallholder adaptation (e.g., Africa Rural Climate Adaptation Finance Mechanism — combines grants + DFI loans + private capital + guarantees)"}, {"title": "Payment for Ecosystem Services (PES) as a revenue stream for conservation-linked farming"}, {"title": "Voluntary carbon credits from soil carbon/agroforestry projects — emerging but requires robust MRV (measurement, reporting, verification)"}]}, {"title": "Top 20 Exam Facts", "children": [{"title": "NbS 3 pillars: Protect, Sustainably Manage, Restore"}, {"title": "Ag-NbS triple benefit: livelihoods + climate + biodiversity"}, {"title": "Agriculture uses >50% of Earth's habitable land"}, {"title": "Only 3 crops = rice, maize, wheat provide >50% of global food energy"}, {"title": "Agriculture = largest driver of global biodiversity loss"}, {"title": "IUCN Global Standard for NbS launched 2020: 8 criteria, 28 indicators"}, {"title": "Agroecology uniquely centers human/social dimensions vs NbS & Regen Ag"}, {"title": "FMNR = Farmer-Managed Natural Regeneration — low-cost tree regrowth technique"}, {"title": "Niger restored ~5 million hectares via regenerative land restoration"}, {"title": "Mali agroforestry plots exceeded native forest biomass"}, {"title": "IPES-Food 'Smoke & Mirrors' critiques NbS for lacking transformative definition"}, {"title": "Cohen-Shacham et al. (2016) = foundational NbS definition source"}, {"title": "PES = Payment for Ecosystem Services — market mechanism for conservation"}, {"title": "Regenerative ag increases soil carbon storage & moisture retention"}, {"title": "50,000+ edible plants exist globally, but only 3 dominate food supply"}, {"title": "Pollinator protection (banning bee-harming pesticides) = key food security action"}, {"title": "Africa Rural Climate Adaptation Finance Mechanism = blended finance case example"}, {"title": "UN Food Systems Summit & UN climate/biodiversity COPs mainstreamed these terms"}, {"title": "Wetland/mangrove restoration = carbon + coastal protection + fisheries co-benefit"}, {"title": "Key risk: terminology overlap can enable greenwashing without real transformation"}]}, {"title": "Interview Prep", "children": [{"title": "Q: What's the difference between Nature-based Solutions, Regenerative Agriculture, and Agroecology?", "children": [{"title": "A: All three restore ecosystems & biodiversity, but Agroecology uniquely centers human/social equity; NbS is an umbrella action framework (protect/manage/restore); Regenerative Ag focuses on soil/farm-level carbon & biodiversity outcomes"}, {"title": "Strong close: mention the IPES-Food critique — NbS risks being vague/co-opted without a transformative vision"}]}, {"title": "Q: Why is the food system such a critical lever for both climate and biodiversity?", "children": [{"title": "A: Agriculture uses >50% of habitable land and is the largest driver of biodiversity loss — but it's also one of the biggest opportunities, since regenerative practices can restore degraded land AND reduce pressure to clear new habitat"}, {"title": "Stat to drop: only 3 crops (rice, maize, wheat) supply >50% of global food energy — shows fragility of current system"}]}, {"title": "Q: How would you design an Ag-NbS project to be genuinely investable?", "children": [{"title": "A: Apply the IUCN Global Standard's 8 criteria (environmental, social, economic viability + adaptive management), build in MRV for carbon/biodiversity outcomes, and structure with blended finance (grants + DFI loans + guarantees) to de-risk for private capital"}, {"title": "Reference: FAO's finance guide approach & Africa Rural Climate Adaptation Finance Mechanism as a model"}]}, {"title": "Q: Give a real-world example of regenerative agriculture success", "children": [{"title": "A: Niger restored ~5 million hectares of degraded Sahel land through farmer-led regeneration (FMNR); Mali's agroforestry restoration created plots with higher biomass than native forest"}, {"title": "Use this to show you know both the concept and grounded evidence"}]}, {"title": "Curveball: Isn't 'nature-based solutions' just a buzzword?", "children": [{"title": "A: Acknowledge the critique honestly — IPES-Food's 'Smoke & Mirrors' report argues NbS lacks a clear transformative definition compared to agroecology — but the IUCN Global Standard (2020) is an attempt to make it rigorous and measurable"}, {"title": "Shows critical thinking rather than just reciting definitions"}]}, {"title": "Q: How do you see carbon markets fitting into food/nature investment?", "children": [{"title": "A: Voluntary carbon credits (soil carbon, agroforestry) can fund smallholder transitions, but require robust MRV — quality and additionality concerns are a known market risk"}, {"title": "Balance optimism with caution — shows nuanced understanding"}]}, {"title": "Behavioral: How would you engage smallholder farmers to adopt regenerative practices?", "children": [{"title": "Structure: understand local incentives/constraints first → co-design with farmers (not top-down) → pair technical support with access to finance/markets (e.g., PES, carbon credits)"}, {"title": "Reference Indigenous/traditional knowledge as often underutilized in mainstream ag — ties back to NbS definition"}]}]}]}, {"id": "material-circular", "code": "04", "label": "Material & Circular Economy", "accent": "#8A5A44", "tree": [{"title": "Core Definitions", "children": [{"title": "Circular Economy (CE) = economic model minimizing waste, keeping materials/products in use at highest value for as long as possible"}, {"title": "Contrasts with Linear Economy: 'take → make → dispose' model"}, {"title": "No single universally agreed definition — concept applied differently by policymakers, industry, academia (Kirchherr et al.)"}, {"title": "Material flow accounting: measures resource extraction, use & waste flows economy-wide (mass-balanced approach)"}, {"title": "Ellen MacArthur Foundation estimate: comprehensive shift to circular principles could address up to 70% of global GHG emissions"}]}, {"title": "The 9R Framework (Potting et al., 2017)", "children": [{"title": "Hierarchy: earlier strategies in value chain = higher circularity (more preferred)"}, {"title": "R0 Refuse → avoid using the resource/product entirely; redesign function away"}, {"title": "R1 Rethink → redesign product/business model to minimize footprint while keeping utility (e.g., product-as-a-service)"}, {"title": "R2 Reduce → increase efficiency in manufacturing/use → less material, energy, waste"}, {"title": "R3 Reuse → reuse a discarded but still functioning product for same purpose"}, {"title": "R4 Repair → maintenance/repair to extend product lifespan"}, {"title": "R5 Refurbish → restore an old product to good working condition"}, {"title": "R6 Remanufacture → use parts of discarded product in a new product of same function"}, {"title": "R7 Repurpose → use discarded product/parts in a new product with different function"}, {"title": "R8 Recycle → process materials to obtain same/lower quality (down-cycling common)"}, {"title": "R9 Recover (energy recovery) → incinerate materials to capture energy — lowest circularity, last resort"}, {"title": "Mnemonic: Refuse-Rethink-Reduce = smart/design strategies; Reuse-Repair-Refurbish-Remanufacture-Repurpose = extend lifespan; Recycle-Recover = close/end loop (last resort)"}]}, {"title": "Classic 3R vs Expanded 9R", "children": [{"title": "3R (traditional) = Reduce, Reuse, Recycle — foundation, still widely referenced"}, {"title": "9R = expansion adding upstream design strategies (Refuse, Rethink) & lifecycle-extension strategies (Repair, Refurbish, Remanufacture, Repurpose)"}, {"title": "Design-stage strategies (Refuse, Rethink, Reduce) = highest impact, prevent waste before it's created"}, {"title": "End-of-life strategies (Recycle, Recover) = last resort — should be exception, not default"}, {"title": "Rooted partly in 1980s lean production principles (minimizing waste in manufacturing)"}]}, {"title": "Policy & Institutional Frameworks", "children": [{"title": "EU Circular Economy Action Plan (adopted 2015) → launched EU-wide shift from linear to resource-efficient economy"}, {"title": "National strategies, e.g., Austria's National Circular Economy Strategy (adopted Dec 2022)"}, {"title": "Focus areas: intelligent product design, efficient material cycles, innovative business models"}, {"title": "Right-to-repair regulations → legally mandate repairability, supporting R4 (Repair)"}, {"title": "Material passports → digital records of material composition enabling future recovery/recycling"}]}, {"title": "Measuring Circularity", "children": [{"title": "9R Circularity Index → composite score (0-100), similar structure to Material Circularity Indicator (MCI)"}, {"title": "Includes: potential closed-loop index, potential rethink indicator, potential reduce indicator"}, {"title": "Design-for-assembly/disassembly & material passports → increase potential material recovery score"}, {"title": "Economy-wide monitoring (e.g., EU28 framework) integrates extraction, use & waste statistics"}]}, {"title": "Business Models & Benefits", "children": [{"title": "Product-as-a-Service (PaaS) → company retains ownership, sells function/use (e.g., leasing, subscription)"}, {"title": "Industrial symbiosis → one company's waste/by-product becomes another's input"}, {"title": "Sharing/collaborative consumption platforms"}, {"title": "Benefits: lower waste disposal costs, better process efficiency, reduced environmental/social impact, new strategic partnerships, competitive advantage"}, {"title": "Secondary raw materials marketplaces (e.g., scrap, by-product trading platforms)"}]}, {"title": "Sector Examples", "children": [{"title": "Fashion/textiles → durable, repairable, recyclable fabrics; circulate garments for as long as highest value retained (khadi cotton, linen blends as examples)"}, {"title": "Construction → material recovery from demolition, modular/design-for-disassembly buildings"}, {"title": "Electronics (e-waste) → repair, refurbish, remanufacture to extend device life"}, {"title": "Packaging → reduce material use (e.g., 30% less plastic with same performance)"}]}, {"title": "Barriers & Critiques", "children": [{"title": "Over-reliance on Recycling as default (bottom of hierarchy) rather than prevention strategies"}, {"title": "Waste-to-energy (Recovery) → better than landfill but destroys material value permanently"}, {"title": "Lack of standardized definitions/metrics complicates cross-country comparison"}, {"title": "Down-cycling: recycled material often lower quality than original → not a true closed loop"}, {"title": "Circular practices must be paired with reduced overall consumption to achieve real impact"}]}, {"title": "Top 20 Exam Facts", "children": [{"title": "9R Framework created by Potting et al. (2017), PBL Netherlands Environmental Assessment Agency + Utrecht University"}, {"title": "9R order (most→least circular): Refuse, Rethink, Reduce, Reuse, Repair, Refurbish, Remanufacture, Repurpose, Recycle, Recover"}, {"title": "3R (Reduce, Reuse, Recycle) = original/classic framework, still widely known"}, {"title": "Recycle & Recover = last-resort, lowest circularity strategies"}, {"title": "Ellen MacArthur Foundation: circular economy could cut up to 70% of global GHG emissions"}, {"title": "EU Circular Economy Action Plan adopted 2015"}, {"title": "Austria National Circular Economy Strategy adopted Dec 2022"}, {"title": "Material passports + design-for-disassembly = boost circularity index scores"}, {"title": "MCI = Material Circularity Indicator, benchmark similar to 9R Circularity Index (0-100 scale)"}, {"title": "Rethink = redesign product/business model (e.g., product-as-a-service) while keeping utility"}, {"title": "Reduce = efficiency at manufacturing/design stage, NOT end-of-life"}, {"title": "Industrial symbiosis = one firm's waste becomes another firm's input"}, {"title": "Down-cycling = quality loss during recycling — a key CE limitation"}, {"title": "Right-to-repair regulation supports the Repair (R4) strategy"}, {"title": "Linear economy = take-make-dispose; CE = keep materials in use at highest value"}, {"title": "Lean production (1980s) = historical root of resource-efficiency thinking behind 3R/9R"}, {"title": "No single universal definition of CE — contested/evolving concept (Kirchherr et al.)"}, {"title": "Material flow accounting = mass-balanced measurement of economy-wide resource/waste flows"}, {"title": "Circular fashion example: garments kept in circulation while highest value is retained"}, {"title": "Key principle: CE strategies should be pursued from design stage, not bolted on at end-of-life"}]}, {"title": "Interview Prep", "children": [{"title": "Q: Walk me through the 9R framework and why the order matters", "children": [{"title": "A: Refuse, Rethink, Reduce (design-stage prevention) → Reuse, Repair, Refurbish, Remanufacture, Repurpose (lifespan extension) → Recycle, Recover (end-of-life, last resort)"}, {"title": "Key point to make: earlier strategies prevent waste before it exists — that's why they're prioritized over recycling"}]}, {"title": "Q: Isn't recycling the main solution to the waste problem?", "children": [{"title": "A: No — recycling is actually near the bottom of the hierarchy; over-reliance on it is a common misconception. Down-cycling means recycled material is often lower quality, so it's not a true closed loop"}, {"title": "Strong answer signals you understand CE beyond the popular 'recycling = sustainability' framing"}]}, {"title": "Q: How would you help a company become more circular?", "children": [{"title": "A: Start upstream — Rethink business model (e.g., product-as-a-service), Reduce material intensity in design, enable Repair (right-to-repair), THEN address end-of-life recovery"}, {"title": "Mention: material passports & design-for-disassembly to raise circularity index scores"}]}, {"title": "Q: What's the business case for circular economy, not just the environmental one?", "children": [{"title": "A: Lower waste disposal costs, better process efficiency, new revenue via secondary material marketplaces/industrial symbiosis, competitive advantage & regulatory readiness (e.g., EU CE Action Plan, right-to-repair laws)"}, {"title": "Good to have a number ready: Ellen MacArthur Foundation estimates CE could address up to 70% of global GHG emissions"}]}, {"title": "Q: How do you measure circularity in practice?", "children": [{"title": "A: Metrics like the Material Circularity Indicator (MCI) or 9R Circularity Index (0-100 scale) combining closed-loop potential, rethink potential, and reduce potential"}, {"title": "Mention limitation: lack of a single universal definition/metric makes cross-company or cross-country comparison hard"}]}, {"title": "Curveball: Give an example of a circular strategy that backfired or underdelivered", "children": [{"title": "A: Waste-to-energy (Recovery) is often marketed as 'circular' but it permanently destroys material value — it's better than landfill, not a real closed loop"}, {"title": "Shows you can critically evaluate rather than default to positive spin"}]}, {"title": "Behavioral: Tell me about a time you redesigned a process to reduce waste/inefficiency", "children": [{"title": "Use STAR; tie back to a specific 'R' strategy (e.g., Reduce or Rethink) to show structured thinking, not just anecdote"}, {"title": "Quantify impact if possible (% material saved, cost reduced, etc.)"}]}]}]}];
+
+let activeId = RAW_BABS[0].id;
+let query = "";
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function countLeaves(node) {
+  if (!node.children || node.children.length === 0) return 1;
+  return node.children.reduce((sum, c) => sum + countLeaves(c), 0);
+}
+
+function normalize(s) { return s.toLowerCase(); }
+
+function filterTree(nodes, q) {
+  if (!q) return { nodes, matchCount: 0 };
+  const nq = normalize(q);
+  let matchCount = 0;
+
+  function walk(node) {
+    const titleHit = normalize(node.title).includes(nq);
+    if (titleHit) matchCount++;
+    if (!node.children) {
+      return titleHit ? Object.assign({}, node, { __hit: true }) : null;
+    }
+    const kept = node.children.map(walk).filter(Boolean);
+    if (titleHit || kept.length > 0) {
+      return Object.assign({}, node, { __hit: titleHit, children: kept });
+    }
+    return null;
+  }
+  const result = nodes.map(walk).filter(Boolean);
+  return { nodes: result, matchCount };
+}
+
+function highlightHTML(text, q) {
+  if (!q) return escapeHtml(text);
+  const nq = normalize(q);
+  const idx = normalize(text).indexOf(nq);
+  if (idx === -1) return escapeHtml(text);
+  const before = escapeHtml(text.slice(0, idx));
+  const mid = escapeHtml(text.slice(idx, idx + q.length));
+  const after = escapeHtml(text.slice(idx + q.length));
+  return `${before}<mark style="background:var(--mark-bg)">${mid}</mark>${after}`;
+}
+
+function escapeHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+function getActiveBab() {
+  return RAW_BABS.find(b => b.id === activeId);
+}
+
+function renderTabs() {
+  const rail = document.getElementById('tab-rail');
+  rail.innerHTML = '';
+  RAW_BABS.forEach(bab => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (bab.id === activeId ? ' active' : '');
+    if (bab.id === activeId) {
+      btn.style.background = bab.accent;
+    }
+    btn.innerHTML = `<span class="tab-code">BAB ${bab.code}</span><span class="tab-label">${escapeHtml(bab.label)}</span>`;
+    btn.addEventListener('click', () => {
+      activeId = bab.id;
+      query = "";
+      renderAll();
+    });
+    rail.appendChild(btn);
+  });
+}
+
+function renderTreeNode(node, depth, q, path, forceOpen) {
+  const hasChildren = node.children && node.children.length > 0;
+
+  if (!hasChildren) {
+    const li = document.createElement('li');
+    li.className = 'leaf' + (node.__hit ? ' hit' : '');
+    const p = document.createElement('p');
+    p.innerHTML = highlightHTML(node.title, q);
+    li.appendChild(p);
+    return li;
+  }
+
+  const li = document.createElement('li');
+  li.className = 'branch' + (depth > 0 ? ' depth-gt0' : '');
+
+  const btn = document.createElement('button');
+  btn.className = 'branch-btn ' + (depth === 0 ? 'depth0' : 'depthN');
+
+  const chevronOpen = forceOpen !== null ? forceOpen : (depth < 1);
+  const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  chevron.setAttribute('width', depth === 0 ? '16' : '14');
+  chevron.setAttribute('height', depth === 0 ? '16' : '14');
+  chevron.setAttribute('viewBox', '0 0 24 24');
+  chevron.setAttribute('fill', 'none');
+  chevron.setAttribute('stroke', 'currentColor');
+  chevron.setAttribute('stroke-width', '2');
+  chevron.classList.add('chevron');
+  if (chevronOpen) chevron.classList.add('open');
+  chevron.innerHTML = '<path d="m9 18 6-6-6-6"/>';
+  btn.appendChild(chevron);
+
+  const titleSpan = document.createElement('span');
+  titleSpan.className = 'branch-title ' + (depth === 0 ? 'depth0' : 'depthN');
+  titleSpan.innerHTML = highlightHTML(node.title, q);
+  btn.appendChild(titleSpan);
+
+  if (depth === 0) {
+    const ptsSpan = document.createElement('span');
+    ptsSpan.className = 'pts-count';
+    ptsSpan.textContent = countLeaves(node) + ' pts';
+    btn.appendChild(ptsSpan);
+  }
+
+  const childUl = document.createElement('ul');
+  childUl.className = 'children-list' + (chevronOpen ? ' open' : '');
+  node.children.forEach((child, i) => {
+    childUl.appendChild(renderTreeNode(child, depth + 1, q, path + '-' + i, forceOpen));
+  });
+
+  btn.addEventListener('click', () => {
+    const isOpen = childUl.classList.contains('open');
+    childUl.classList.toggle('open', !isOpen);
+    chevron.classList.toggle('open', !isOpen);
+  });
+
+  li.appendChild(btn);
+  li.appendChild(childUl);
+  return li;
+}
+
+function renderChips() {
+  const bab = getActiveBab();
+  const chipsEl = document.getElementById('chips');
+  chipsEl.innerHTML = '';
+  bab.tree.forEach((section, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = section.title;
+    chip.addEventListener('click', () => {
+      const target = document.getElementById(`${bab.id}-section-${i}`);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    chipsEl.appendChild(chip);
+  });
+}
+
+function renderTree() {
+  const bab = getActiveBab();
+  const container = document.getElementById('tree-container');
+  container.innerHTML = '';
+  const q = query.trim();
+  const { nodes: visibleTree, matchCount } = filterTree(bab.tree, q);
+
+  const matchCountEl = document.getElementById('match-count');
+  if (q) {
+    matchCountEl.textContent = `${matchCount} match${matchCount === 1 ? '' : 'es'} for "${q}"`;
+  } else {
+    matchCountEl.textContent = '';
+  }
+
+  if (visibleTree.length === 0) {
+    const p = document.createElement('p');
+    p.className = 'empty-msg';
+    p.textContent = 'No matches in this chapter. Try another term or switch chapters.';
+    container.appendChild(p);
+    return;
+  }
+
+  const ul = document.createElement('ul');
+  ul.className = 'tree-list';
+  visibleTree.forEach((section, i) => {
+    const wrapper = document.createElement('div');
+    wrapper.id = `${bab.id}-section-${i}`;
+    wrapper.appendChild(renderTreeNode(section, 0, q, `${bab.id}-${i}`, q ? true : null));
+    ul.appendChild(wrapper);
+  });
+  container.appendChild(ul);
+}
+
+function renderHeader() {
+  const bab = getActiveBab();
+  document.getElementById('eyebrow').textContent = `CLIMATE INTERVIEW DOSSIER — BAB ${bab.code}`;
+  document.getElementById('eyebrow').style.color = bab.accent;
+  document.getElementById('bab-title').textContent = bab.label;
+  const totalPoints = bab.tree.reduce((s, n) => s + countLeaves(n), 0);
+  document.getElementById('total-points').textContent = `${totalPoints} reference points`;
+
+  document.documentElement.style.setProperty('--accent', bab.accent);
+  document.documentElement.style.setProperty('--mark-bg', hexToRgba(bab.accent, 0.25));
+
+  const searchInput = document.getElementById('search-input');
+  searchInput.placeholder = `Search within ${bab.label}...`;
+  searchInput.value = query;
+  document.getElementById('clear-search').style.display = query ? 'block' : 'none';
+}
+
+function renderAll() {
+  renderTabs();
+  renderHeader();
+  renderChips();
+  renderTree();
+}
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+  query = e.target.value;
+  document.getElementById('clear-search').style.display = query ? 'block' : 'none';
+  renderTree();
+});
+document.getElementById('clear-search').addEventListener('click', () => {
+  query = '';
+  document.getElementById('search-input').value = '';
+  document.getElementById('clear-search').style.display = 'none';
+  renderTree();
+});
+
+renderAll();
+</script>
+</body>
+</html>
